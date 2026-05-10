@@ -5,7 +5,7 @@ const supabase = createClient(
   'https://finflxwozcdhomynmcfo.supabase.co',
   'sb_publishable_NRgY-vUIROvY0pZ_Zmy_xg_dX5Pucbh'
 )
-async function login() {
+window.login = async function () {
     const email = document.getElementById('email').value
     const password = document.getElementById('password').value
   
