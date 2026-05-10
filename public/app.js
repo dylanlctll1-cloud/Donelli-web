@@ -5,7 +5,7 @@ const supabase = createClient(
   'sb_publishable_NRgY-vUIROvY0pZ_Zmy_xg_dX5Pucbh'
 )
 async function login() {
-    const email = document.getElementById('username').value
+    const email = document.getElementById('email').value
     const password = document.getElementById('password').value
   
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -14,7 +14,8 @@ async function login() {
     })
   
     if (error) {
-      document.getElementById('error').innerText = "Identifiants incorrects"
+      document.getElementById('error').innerText = error.message
+      console.log(error)
     } else {
       alert("Connexion réussie 🔥")
     }
