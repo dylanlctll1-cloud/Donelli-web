@@ -1,4 +1,5 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+console.log("JS CHARGÉ");
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
 const supabase = createClient(
   'https://finflxwozcdhomynmcfo.supabase.co',
