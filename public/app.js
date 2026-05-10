@@ -1,20 +1,21 @@
-function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const users = [
-        { username: "gerant1", password: "1234" },
-        { username: "gerant2", password: "abcd" }
-    ];
-
-    const user = users.find(u => 
-        u.username === username && u.password === password
-    );
-
-    if (user) {
-        // 👉 redirection vers la page menu
-        window.location.href = "menu.html";
+const supabase = createClient(
+  'https://finflxwozcdhomynmcfo.supabase.co',
+  'sb_publishable_NRgY-vUIROvY0pZ_Zmy_xg_dX5Pucbh'
+)
+async function login() {
+    const email = document.getElementById('username').value
+    const password = document.getElementById('password').value
+  
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+  
+    if (error) {
+      document.getElementById('error').innerText = "Identifiants incorrects"
     } else {
-        document.getElementById("error").innerText = "Identifiants incorrects";
+      alert("Connexion réussie 🔥")
     }
-}
+  }
