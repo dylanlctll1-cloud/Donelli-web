@@ -3,35 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>Menu</title>
+
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    .logo {
+      width: 150px;
+      margin-bottom: 20px; 
+    }
+
+    .btn {
+      display: block;
+      width: 250px;
+      margin: 15px auto;
+      padding: 15px;
+      background: gold;
+      color: black;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
 
-  <h1>Bienvenue 🔥</h1>
+  <img src="logo.png" class="logo">
 
-  <p id="email"></p>
+  <h2>Bienvenue 🔥</h2>
 
-  <button onclick="logout()">Se déconnecter</button>
+  <button class="btn" onclick="go('hygiene.html')">Hygiène</button>
+  <button class="btn" onclick="go('alimentaire.html')">Alimentaire</button>
+  <button class="btn" onclick="go('finances.html')">Finances</button>
+
+  <button class="btn" onclick="logout()">Se déconnecter</button>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
     const supabase = createClient(
       'https://finflxwozcdhomynmcfo.supabase.co',
-      'TA_CLE_API_ICI'
+  'sb_publishable_NRgY-vUIROvY0pZ_Zmy_xg_dX5Pucbh'
     )
 
-    // récupérer l'utilisateur connecté
+    // vérifier si connecté
     const { data } = await supabase.auth.getUser()
 
     if (!data.user) {
-      // pas connecté → retour login
       window.location.href = "index.html"
-    } else {
-      // afficher email
-      document.getElementById("email").innerText = data.user.email
     }
 
-    // bouton logout
+    // navigation
+    window.go = (page) => {
+      window.location.href = page
+    }
+
+    // logout
     window.logout = async () => {
       await supabase.auth.signOut()
       window.location.href = "index.html"
