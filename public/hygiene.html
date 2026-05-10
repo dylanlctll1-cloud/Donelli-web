@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hygiène Pro</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: black;
+    color: white;
+}
+
+.header {
+    text-align: center;
+    padding: 20px;
+}
+
+.logo {
+    width: 100px;
+}
+
+.container {
+    padding: 15px;
+}
+
+.card {
+    background: #111;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: gold;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: linear-gradient(45deg, gold, #d4af37);
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #222;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 5px;
+}
+
+.task small {
+    color: #aaa;
+}
+
+.day {
+    margin-bottom: 20px;
+}
+
+.done {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="logo.png" class="logo">
+    <h1>Hygiène</h1>
+</div>
+
+<div class="container">
+
+<!-- AJOUT -->
+<div class="card">
+    <h2>Ajouter une tâche</h2>
+    <input id="taskInput" placeholder="Ex: Nettoyer cuisine">
+    <input id="userInput" placeholder="Nom du responsable">
+    <select id="daySelect">
+        <option>Lundi</option>
+        <option>Mardi</option>
+        <option>Mercredi</option>
+        <option>Jeudi</option>
+        <option>Vendredi</option>
+        <option>Samedi</option>
+        <option>Dimanche</option>
+    </select>
+    <button onclick="addTask()">Ajouter</button>
+</div>
+
+<!-- PLANNING -->
+<div class="card">
+    <h2>Planning semaine</h2>
+    <div id="planning"></div>
+</div>
+
+<!-- TEMP -->
+<div class="card">
+    <h2>Températures</h2>
+    <input id="frigo" placeholder="Frigo °C">
+    <input id="friteuse" placeholder="Friteuse °C">
+    <input id="tempUser" placeholder="Nom du responsable">
+    <button onclick="saveTemps()">Enregistrer</button>
+</div>
+
+<!-- PDF -->
+<div class="card">
+    <button onclick="generatePDF()">📄 Télécharger rapport</button>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let data = JSON.parse(localStorage.getItem("hygiene")) || {
+    tasks: {},
+    temps: []
+};
+
+const days = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+
+function render() {
+    const container = document.getElementById("planning");
+    container.innerHTML = "";
+
+    days.forEach(day => {
+        const div = document.createElement("div");
+        div.className = "day";
+
+        div.innerHTML = `<h3>${day}</h3>`;
+
+        (data.tasks[day] || []).forEach((task, index) => {
+            const t = document.createElement("div");
+            t.className = "task";
+
+            t.innerHTML = `
+                <div>
+                    <input type="checkbox" ${task.done ? "checked":""}
+                    onchange="toggle('${day}',${index})">
+                    <span class="${task.done ? 'done':''}">${task.name}</span>
+                    <br>
+                    <small>👤 ${task.user || "Non assigné"}</small>
+                </div>
+                <button onclick="removeTask('${day}',${index})">❌</button>
+            `;
+
+            div.appendChild(t);
+        });
+
+        container.appendChild(div);
+    });
+
+    localStorage.setItem("hygiene", JSON.stringify(data));
+}
+
+function addTask() {
+    const name = document.getElementById("taskInput").value;
+    const user = document.getElementById("userInput").value;
+    const day = document.getElementById("daySelect").value;
+
+    if (!data.tasks[day]) data.tasks[day] = [];
+
+    data.tasks[day].push({ name, user, done:false });
+
+    document.getElementById("taskInput").value = "";
+    document.getElementById("userInput").value = "";
+
+    render();
+}
+
+function toggle(day, index) {
+    data.tasks[day][index].done = !data.tasks[day][index].done;
+    render();
+}
+
+function removeTask(day, index) {
+    data.tasks[day].splice(index,1);
+    render();
+}
+
+function saveTemps() {
+    const frigo = document.getElementById("frigo").value;
+    const friteuse = document.getElementById("friteuse").value;
+    const user = document.getElementById("tempUser").value;
+
+    data.temps.push({
+        date: new Date().toLocaleString(),
+        frigo,
+        friteuse,
+        user
+    });
+
+    localStorage.setItem("hygiene", JSON.stringify(data));
+    alert("Températures enregistrées");
+}
+
+async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let y = 10;
+
+    doc.text("Rapport Hygiène - Donelli", 10, y);
+    y += 10;
+
+    days.forEach(day => {
+        doc.text(day, 10, y);
+        y += 5;
+
+        (data.tasks[day] || []).forEach(task => {
+            doc.text(`- ${task.name} (${task.done ? "OK":"NON"}) - ${task.user}`, 10, y);
+            y += 5;
+        });
+
+        y += 5;
+    });
+
+    y += 5;
+    doc.text("Températures :", 10, y);
+    y += 5;
+
+    data.temps.forEach(t => {
+        doc.text(`${t.date} | Frigo: ${t.frigo} | Friteuse: ${t.friteuse} | ${t.user}`, 10, y);
+        y += 5;
+    });
+
+    doc.save("rapport-hygiene.pdf");
+}
+
+render();
+</script>
+
+</body>
+</html>
