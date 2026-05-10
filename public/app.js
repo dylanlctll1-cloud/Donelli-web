@@ -20,6 +20,6 @@ window.login = async function () {
   if (error) {
     document.getElementById('error').innerText = "Identifiants incorrects"
   } else {
-    alert("Connexion réussie 🔥")
+    alert("Connexion réussie 🔥") 
   }
 }
